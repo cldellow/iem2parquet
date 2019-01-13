@@ -9,8 +9,7 @@ finish() {
 
 trap finish EXIT
 
-cat "$file" |
-  grep -v '^#DEBUG' |
+grep -v '^#DEBUG' "$file" |
   sed -e 's/\t\([0-9]*\)-\([0-9]*\)-\([0-9]*\) \([0-9]*\):\([0-9]*\)\t/\t\1\t\2\t\3\t\4\t\5\t/' \
     -e 's/station\tvalid/station\tyear\tmonth\tday\thour\tminute/' > "$file".tmp.tsv
 
