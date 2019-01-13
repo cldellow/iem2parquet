@@ -27,20 +27,22 @@ pip install pyarrow csv2parquet
 
 # Convert to Parquet file.
 ./pq ykf.tsv
+
+# Convert to Parquet file, retain the raw METAR field.
+INCLUDE_RAW_METAR=1 ./pq ykf.tsv
 ```
 
 ## Space savings
 
 This table compares the uncompressed TSV size vs the Parquet size for my hometown's
-data. Note that the Parquet file does not include the raw METAR string, which gives
-it an unfair advantage.
+data.
 
-| Duration | TSV size   | Parquet size | Size decrease |
-|----------|------------|--------------|---------------|
-| 1 day    | 15,821     | 7,714        | 51.2%         |
-| 1 month  | 331,242    | 25,067       | 92.4%         |
-| 1 year   | 3,686,065  | 171,390      | 95.4%         |
-| 1 decade | 37,528,193 | 1,580,540    | 95.8%         |
+| Duration | TSV size   | Parquet size (incl METAR / excl METAR) | Size decrease |
+|----------|------------|----------------------------------------|---------------|
+| 1 day    | 15,821     | 9,641 / 7,714                          | 39.1% / 51.2% |
+| 1 month  | 331,242    | 54,080 / 25,067                        | 83.7% / 92.4% |
+| 1 year   | 3,686,065  | 496,247 / 171,390                      | 86.5% / 95.4% |
+| 1 decade | 37,528,193 | 4,768,956 / 1,580,540                  | 87.3% / 95.8% |
 
 ## Useful Links
 
