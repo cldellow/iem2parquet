@@ -1,0 +1,89 @@
+#!/usr/bin/python3
+import sys
+import datetime
+from statistics import median
+
+"""
+Intended use: pipe a few years of data to this script, it prints out summary
+statistics.
+
+eg:
+
+ls output/*/*zst | sed -e 's#.*/##' | sort | uniq | while read -r f; do zstdcat output/*/$f | ./summarize; done
+
+Current output is:
+
+code lat lng min_data_points min_year max_year lows_f highs_f
+"""
+
+def main():
+  lat, lng, code = None, None, None
+  lows = [[] for x in range(365)]
+  highs = [[] for x in range(365)]
+  years = []
+
+  low = None
+  high = None
+
+  today = None
+  for x in sys.stdin:
+    x = x.strip()
+    if x.startswith('#') or x.startswith('station\t'):
+      continue
+
+    cols = x.split('\t')
+    ts = cols[1]
+
+    _code, _lat, _lng = cols[0], cols[2], cols[3]
+    if lat is None and lng is None:
+      lat = _lat
+      lng = _lng
+      code = _code
+    elif lat != _lat or lng != _lng or _code != code:
+      raise Exception('multiple lat/lngs or differing codes found: old = {}, {} ({}); new = {}, {} ({})'.format(lat, lng, code, _lat, _lng, _code))
+
+    date, time = ts.split(' ')
+
+    # Ignore leap years.
+    if date[5:10] == '02-29':
+      continue
+
+    if date != today:
+      year = date[0:4]
+      if not year in years:
+        years.append(year)
+      if low != None and high != None:
+        days_in_the_year = (datetime.date(2001, int(today[5:7]), int(today[8:10])) - datetime.date(2001, 1 ,1)).days
+        lows[days_in_the_year].append(low)
+        highs[days_in_the_year].append(high)
+
+        # For some reason, Dec 31 is missing from the datasets. Just fill it in with Dec 30.
+        if days_in_the_year == 363:
+          lows[days_in_the_year + 1].append(low)
+          highs[days_in_the_year + 1].append(high)
+
+        low, high = None, None
+      today = date
+    elif cols[4] != 'M':
+      tmp = float(cols[4])
+      if low == None:
+        low, high = tmp, tmp
+
+      if tmp < low: low = tmp
+      if tmp > high: high = tmp
+
+  how_many = min([len(x) for x in lows])
+  if how_many > 0:
+    print('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+      code,
+      lat,
+      lng,
+      how_many,
+      min(years),
+      max(years),
+      ' '.join([str(median(x)) for x in lows]),
+      ' '.join([str(median(x)) for x in highs])
+    ))
+
+if __name__ == '__main__':
+  main()

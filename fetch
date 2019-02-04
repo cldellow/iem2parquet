@@ -16,6 +16,10 @@ end_date=${3:?must provide emd date, eg 2018-1-31}
 IFS=- read -r start_y start_m start_d <<< "$start_date"
 IFS=- read -r end_y end_m end_d <<< "$end_date"
 
-curl --silent --fail --connect-timeout 10 "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=${station}&data=all&year1=${start_y}&month1=${start_m}&day1=${start_d}&year2=${end_y}&month2=${end_m}&day2=${end_d}&tz=Etc%2FUTC&format=tdf&latlon=yes&direct=no&report_type=1&report_type=2" > "$f"
+curl --silent \
+  --fail \
+  --connect-timeout 10 \
+  --user-agent "iem2parquet (+https://github.com/cldellow/iem2parquet)" \
+  "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=${station}&data=all&year1=${start_y}&month1=${start_m}&day1=${start_d}&year2=${end_y}&month2=${end_m}&day2=${end_d}&tz=Etc%2FUTC&format=tdf&latlon=yes&direct=no&report_type=1&report_type=2" > "$f"
 
 cat "$f"
