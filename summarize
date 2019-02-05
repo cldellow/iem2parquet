@@ -35,6 +35,11 @@ def main():
     ts = cols[1]
 
     _code, _lat, _lng = cols[0], cols[2], cols[3]
+    if _code == 'WBGS':
+      # The lat/lng for this station changes over time. Pin it to the most recent value.
+      _lat = '111.8333'
+      _lng = '2.3333'
+
     if lat is None and lng is None:
       lat = _lat
       lng = _lng
